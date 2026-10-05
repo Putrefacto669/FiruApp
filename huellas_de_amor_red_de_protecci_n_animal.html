@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huellas de Amor - Red de Protección y Adopción Animal</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #ecfdf5;
+            --secondary: #3b82f6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --dark-gray: #4b5563;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 8px;
+            --radius: 14px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .brand-logo {
+            background: linear-gradient(135deg, #10b981, #047857);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+
+        .brand-text h1 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--dark);
+        }
+
+        .brand-text span {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.35rem;
+            background: #f1f5f9;
+            padding: 0.3rem;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            border: none;
+            background: transparent;
+            padding: 0.55rem 1rem;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--dark);
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--primary-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            border: none;
+            padding: 0.6rem 1.1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dark);
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+
+        /* MAIN WRAPPER */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .tab-view.active {
+            display: flex;
+        }
+
+        /* TAB 1: INTERACTIVE MAP */
+        #map-tab {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #leaflet-map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Floating Sidebar Controls on Map */
+        .map-floating-sidebar {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 500;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 1.1rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 330px;
+            max-width: calc(100vw - 2rem);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .sidebar-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-title span {
+            color: var(--primary-dark);
+        }
+
+        .filter-section {
+            margin-bottom: 0.85rem;
+        }
+
+        .filter-section label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+        }
+
+        .filter-control {
+            width: 100%;
+            padding: 0.55rem 0.75rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            background: white;
+            outline: none;
+            font-weight: 600;
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 0.35rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .filter-pill.active {
+            background: var(--dark);
+            color: white;
+            border-color: var(--dark);
+        }
+
+        .gps-quick-btn {
+            width: 100%;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border: 1px solid #a7f3d0;
+            padding: 0.55rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .gps-quick-btn:hover {
+            background: #d1fae5;
+        }
+
+        /* Map Legend Bar */
+        .map-legend-bar {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 0.6rem 1.25rem;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+            border: 1px solid var(--border);
+            max-width: calc(100vw - 2rem);
+            overflow-x: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.adoption { background: var(--primary); }
+        .legend-dot.lost { background: var(--danger); }
+        .legend-dot.sighting { background: var(--warning); }
+        .legend-dot.rescue { background: var(--purple); }
+        .legend-dot.deceased { background: var(--dark-gray); }
+
+        /* Custom Map Pins */
+        .custom-pin {
+            width: 34px;
+            height: 34px;
+            border-radius: 50% 50% 50% 0;
+            position: absolute;
+            transform: rotate(-45deg);
+            left: 50%;
+            top: 50%;
+            margin: -17px 0 0 -17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+
+        .custom-pin i {
+            transform: rotate(45deg);
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .pin-adoption { background: var(--primary); }
+        .pin-lost { background: var(--danger); }
+        .pin-sighting { background: var(--warning); }
+        .pin-rescue { background: var(--purple); }
+        .pin-deceased { background: var(--dark-gray); }
+
+        /* Leaflet Popup Overrides */
+        .leaflet-popup-content-wrapper {
+            border-radius: var(--radius);
+            padding: 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            width: 250px !important;
+        }
+
+        .popup-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+
+        .popup-body {
+            padding: 0.85rem;
+        }
+
+        .popup-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+        }
+
+        .popup-title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            color: var(--dark);
+        }
+
+        .popup-meta {
+            font-size: 0.78rem;
+            color: #64748b;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .popup-btn {
+            width: 100%;
+            padding: 0.45rem;
+            font-size: 0.78rem;
+            text-align: center;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            background: #25D366;
+            color: white;
+            margin-top: 0.4rem;
+            border: none;
+        }
+
+        /* GRID / CARDS VIEWS */
+        .view-container {
+            width: 100%;
+            height: 100%;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .view-title h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .view-title p {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 0.15rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            padding-bottom: 2rem;
+        }
+
+        .pet-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pet-card-media {
+            position: relative;
+            height: 180px;
+            width: 100%;
+            background: #e2e8f0;
+        }
+
+        .pet-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .pet-card-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .pet-card-dist {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 0.75rem;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .pet-card-content {
+            padding: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .pet-card-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .pet-card-info {
+            font-size: 0.8rem;
+            color: #64748b;
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pet-card-desc {
+            font-size: 0.85rem;
+            color: #334155;
+            line-height: 1.45;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .pet-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.85rem;
+            margin-top: auto;
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .emergency-banner h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .emergency-banner p {
+            font-size: 0.85rem;
+            opacity: 0.95;
+        }
+
+        /* MODAL SYSTEM */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal-window {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalPop 0.2s ease-out;
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.3rem;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0.2rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.85rem;
+        }
+
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            margin-bottom: 0.35rem;
+            color: var(--dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .location-pick-hint {
+            background: #eff6ff;
+            border: 1px dashed #60a5fa;
+            color: #1d4ed8;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-top: 0.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .image-dropzone {
+            width: 100%;
+            height: 110px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .image-dropzone img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .image-dropzone .placeholder {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 0.5rem 1rem; }
+            .brand-text { display: none; }
+            .tab-btn span { display: none; }
+            .map-floating-sidebar { width: calc(100vw - 2rem); }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container" onclick="switchTab('map-tab')">
+            <div class="brand-logo">
+                <i class="fa-solid fa-paw"></i>
+            </div>
+            <div class="brand-text">
+                <h1>Huellas de Amor</h1>
+                <span>Red Protectora & Geolocalizada</span>
+            </div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('map-tab')">
+                <i class="fa-solid fa-map-location-dot"></i> <span>Mapa en Vivo</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('adoption-tab')">
+                <i class="fa-solid fa-heart"></i> <span>Adopciones</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('feed-tab')">
+                <i class="fa-solid fa-bullhorn"></i> <span>Alertas & Reportes</span>
+            </button>
+        </nav>
+
+        <div class="header-actions">
+            <button class="btn btn-danger" onclick="openReportModal('rescue')">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span>Urgencia</span>
+            </button>
+            <button class="btn btn-primary" onclick="openReportModal()">
+                <i class="fa-solid fa-plus"></i> <span>Reportar</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div id="map-tab" class="tab-view active">
+            <div class="map-floating-sidebar">
+                <div class="sidebar-title">
+                    <span><i class="fa-solid fa-sliders"></i> Filtros de Búsqueda</span>
+                    <i class="fa-solid fa-map-pin" style="color:#64748b;"></i>
+                </div>
+
+                <div class="filter-section">
+                    <label>Tipo de Alerta</label>
+                    <select id="filter-type" class="filter-control" onchange="applyFilters()">
+                        <option value="all">Todas las Alertas</option>
+                        <option value="adoption">🟢 En Adopción</option>
+                        <option value="lost">🔴 Mascota Perdida</option>
+                        <option value="sighting">🟡 Avistamiento en Calle</option>
+                        <option value="rescue">🟣 Rescate Urgente</option>
+                        <option value="deceased">⚪ Reporte Fallecido</option>
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <label>Especie</label>
+                    <div class="filter-pills" id="species-pills">
+                        <div class="filter-pill active" data-species="all" onclick="selectSpecies(this)">Todos</div>
+                        <div class="filter-pill" data-species="Perro" onclick="selectSpecies(this)">🐶 Perros</div>
+                        <div class="filter-pill" data-species="Gato" onclick="selectSpecies(this)">🐱 Gatos</div>
+                        <div class="filter-pill" data-species="Otro" onclick="selectSpecies(this)">🐾 Otros</div>
+                    </div>
+                </div>
+
+                <div class="filter-section" style="margin-bottom:0.25rem;">
+                    <label>Radio de Distancia</label>
+                    <select id="filter-radius" class="filter-control" onchange="applyFilters()">
+                        <option value="all">Cualquier distancia</option>
+                        <option value="1">Menos de 1 km</option>
+                        <option value="3">Menos de 3 km</option>
+                        <option value="5">Menos de 5 km</option>
+                        <option value="10">Menos de 10 km</option>
+                    </select>
+                </div>
+
+                <button class="gps-quick-btn" onclick="getUserLocation()">
+                    <i class="fa-solid fa-crosshairs"></i> Mi Ubicación GPS Actual
+                </button>
+            </div>
+
+            <!-- Map Container -->
+            <div id="leaflet-map"></div>
+
+            <!-- Stats & Legend Bar -->
+            <div class="map-legend-bar">
+                <div class="legend-item"><div class="legend-dot adoption"></div> <span id="count-adoption">0</span> Adopción</div>
+                <div class="legend-item"><div class="legend-dot lost"></div> <span id="count-lost">0</span> Perdidos</div>
+                <div class="legend-item"><div class="legend-dot sighting"></div> <span id="count-sighting">0</span> Vistos</div>
+                <div class="legend-item"><div class="legend-dot rescue"></div> <span id="count-rescue">0</span> Urgencias</div>
+                <div class="legend-item"><div class="legend-dot deceased"></div> <span id="count-deceased">0</span> Fallecidos</div>
+            </div>
+        </div>
+
+        <div id="adoption-tab" class="tab-view">
+            <div class="view-container">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h2>Catálogo de Adopciones Responsables</h2>
+                        <p>Dale una segunda oportunidad a un peludo rescatado que busca un hogar para siempre.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openReportModal('adoption')">
+                        <i class="fa-solid fa-heart"></i> Publicar para Adopción
+                    </button>
+                </div>
+
+                <div class="cards-grid" id="adoption-cards-grid">
+                    <!-- Dynamic Adoption Cards loaded via JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="feed-tab" class="tab-view">
+            <div class="view-container">
+                <div class="emergency-banner">
+                    <div>
+                        <h3><i class="fa-solid fa-bell"></i> Red de Alerta y Rescate Inmediato</h3>
+                        <p>Si encontraste un animal accidentado, perdido o fallecido, crea una alerta para notificar a la comunidad.</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="openReportModal('rescue')">
+                        <i class="fa-solid fa-bolt"></i> Emitir Alerta Ahora
+                    </button>
+                </div>
+
+                <div class="view-header">
+                    <div class="view-title">
+                        <h2>Feed de Alertas Comunitarias</h2>
+                        <p>Lista en tiempo real de animales extraviados, reportes de avistamiento y urgencias médicas.</p>
+                    </div>
+                </div>
+
+                <div class="cards-grid" id="feed-cards-grid">
+                    <!-- Dynamic Feed Cards loaded via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-backdrop" id="report-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3 id="modal-title-text">Crear Nuevo Reporte / Mascota</h3>
+                <button class="modal-close-btn" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="report-form" onsubmit="handleFormSubmit(event)">
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Tipo de Publicación *</label>
+                            <select id="form-type" class="form-input" required onchange="updateModalFormStyle()">
+                                <option value="lost">🔴 Mascota Perdida (Busco a mi mascota)</option>
+                                <option value="sighting">🟡 Avistamiento en Calle (Animal sin dueño visto)</option>
+                                <option value="rescue">🟣 Rescate Urgente / Animal Herido</option>
+                                <option value="adoption">🟢 Mascota en Adopción</option>
+                                <option value="deceased">⚪ Animal Fallecido (Aviso de salubridad / dueño)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nombre / Identificador *</label>
+                            <input type="text" id="form-name" class="form-input" placeholder="Ej: Firulais / Desconocido" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Especie *</label>
+                            <select id="form-species" class="form-input" required>
+                                <option value="Perro">Perro</option>
+                                <option value="Gato">Gato</option>
+                                <option value="Otro">Otro animal</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Raza / Aspecto</label>
+                            <input type="text" id="form-breed" class="form-input" placeholder="Ej: Mestizo, Criollo, etc.">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color / Collares / Senas</label>
+                            <input type="text" id="form-color" class="form-input" placeholder="Ej: Mancha negra en ojo, collar rojo">
+                        </div>
+
+                        <div class="form-group full">
+                            <label>Ubicación del Suceso *</label>
+                            <input type="text" id="form-address" class="form-input" placeholder="Ej: Rotonda Centroamérica 1c al sur" required>
+                            <div class="location-pick-hint">
+                                <span id="coords-display-text"><i class="fa-solid fa-location-dot"></i> Coordenadas fijadas en el mapa</span>
+                                <button type="button" class="btn btn-outline" style="padding:0.2rem 0.5rem; font-size:0.7rem;" onclick="setFormToCurrentGPS()">
+                                    Usar mi GPS
+                                </button>
+                            </div>
+                            <input type="hidden" id="form-lat">
+                            <input type="hidden" id="form-lng">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Teléfono / WhatsApp de Contacto *</label>
+                            <input type="tel" id="form-phone" class="form-input" placeholder="+505 8888 8888" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fotografía de Referencia</label>
+                            <div class="image-dropzone" onclick="document.getElementById('form-file').click()">
+                                <img id="form-preview-img" src="" alt="Previsualización">
+                                <div class="placeholder" id="form-file-placeholder">
+                                    <i class="fa-solid fa-camera fa-2x"></i><br>
+                                    <span>Subir imagen</span>
+                                </div>
+                            </div>
+                            <input type="file" id="form-file" accept="image/*" style="display:none;" onchange="handleImageFileSelect(event)">
+                        </div>
+
+                        <div class="form-group full">
+                            <label>Descripción / Detalles adicionales</label>
+                            <textarea id="form-desc" class="form-input" placeholder="Describe la situación de salud, comportamiento o detalles del extravío..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+                        <button type="button" class="btn btn-outline" onclick="closeReportModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="form-submit-btn">Publicar Reporte</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // Global State
+        let map;
+        let markersGroup;
+        let selectedSpeciesFilter = 'all';
+        let defaultUserCoords = { lat: 12.136389, lng: -86.251389 }; // Default: Central coordinates
+        let currentGpsMarker = null;
+        let allReports = [];
+
+        // Realistic Mock Dataset
+        const demoMockDataset = [
+            {
+                id: '101',
+                type: 'lost',
+                name: 'Max',
+                species: 'Perro',
+                breed: 'Golden Retriever Mix',
+                color: 'Dorado claro',
+                address: 'Bolonia, cerca del Hospital Sumedico',
+                phone: '+50588112233',
+                desc: 'Se asustó con pólvora y corrió sin dirección. Lleva collar café.',
+                lat: 12.1420,
+                lng: -86.2730,
+                image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '102',
+                type: 'adoption',
+                name: 'Misha',
+                species: 'Gato',
+                breed: 'Mestiza',
+                color: 'Calicó (Naranja, Negro, Blanco)',
+                address: 'Hogar Temporal Villa Fontana',
+                phone: '+50588445566',
+                desc: 'Rescatada de un tejado. Vacunada, esterilizada y acostumbrada a departamento.',
+                lat: 12.1180,
+                lng: -86.2550,
+                image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '103',
+                type: 'sighting',
+                name: 'Desconocido',
+                species: 'Perro',
+                breed: 'Mestizo de tamaño mediano',
+                color: 'Negro con pecho blanco',
+                address: 'Visto merodeando cerca de la Rotonda Santo Domingo',
+                phone: '+50588778899',
+                desc: 'Tiene collar verde viejo. Parece buscando agua y comida.',
+                lat: 12.1080,
+                lng: -86.2380,
+                image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '104',
+                type: 'rescue',
+                name: 'Cachorritos (3)',
+                species: 'Perro',
+                breed: 'Mestizos',
+                color: 'Varios colores',
+                address: 'Cerca del cauce en Reparto Schick',
+                phone: '+50589001122',
+                desc: 'URGENTE: Abandonados en caja de cartón bajo la lluvia. Necesitan refugio temporal.',
+                lat: 12.1220,
+                lng: -86.2310,
+                image: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '105',
+                type: 'deceased',
+                name: 'Desconocido',
+                species: 'Gato',
+                breed: 'Criollo',
+                color: 'Atigrado gris',
+                address: 'Pista Suburbana, carril derecho hacia el oeste',
+                phone: '+50589990000',
+                desc: 'Aviso de salubridad: Encontrado sin vida en la vía pública.',
+                lat: 12.1290,
+                lng: -86.2800,
+                image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            }
+        ];
+
+        window.onload = function() {
+            loadReportsData();
+            initLeafletMap();
+            getUserLocation();
+            applyFilters();
+        };
+
+        function loadReportsData() {
+            const saved = localStorage.getItem('huellas_amor_reports');
+            if (saved) {
+                try {
+                    allReports = JSON.parse(saved);
+                } catch(e) {
+                    allReports = demoMockDataset;
+                }
+            } else {
+                allReports = demoMockDataset;
+                saveReportsData();
+            }
+        }
+
+        function saveReportsData() {
+            localStorage.setItem('huellas_amor_reports', JSON.stringify(allReports));
+        }
+
+        // Initialize Map using CartoDB Voyager tiles to prevent OSM blockades
+        function initLeafletMap() {
+            map = L.map('leaflet-map', {
+                zoomControl: false
+            }).setView([defaultUserCoords.lat, defaultUserCoords.lng], 13);
+
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            // CARTO DB VOYAGER TILE LAYER (CARTO CDN - Safe from OSM Direct Referer Blocking)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            markersGroup = L.layerGroup().addTo(map);
+
+            // Click listener on map to select spot for a new report
+            map.on('click', function(e) {
+                openReportModal('lost', e.latlng);
+            });
+        }
+
+        // Geolocation Engine
+        function getUserLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        defaultUserCoords = {
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude
+                        };
+
+                        map.setView([defaultUserCoords.lat, defaultUserCoords.lng], 14);
+
+                        if (currentGpsMarker) map.removeLayer(currentGpsMarker);
+
+                        currentGpsMarker = L.circleMarker([defaultUserCoords.lat, defaultUserCoords.lng], {
+                            radius: 8,
+                            fillColor: "#3b82f6",
+                            color: "#ffffff",
+                            weight: 3,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }).addTo(map).bindPopup("<b>Tu Ubicación GPS Actual</b>");
+
+                        applyFilters();
+                    },
+                    err => {
+                        console.warn("Geolocation fallback activated:", err.message);
+                        applyFilters();
+                    }
+                );
+            }
+        }
+
+        // Haversine Distance Calculation Formula
+        function getDistanceKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (R * c).toFixed(1);
+        }
+
+        function applyFilters() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const radiusFilter = document.getElementById('filter-radius').value;
+
+            const filtered = allReports.filter(item => {
+                if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+                if (selectedSpeciesFilter !== 'all' && item.species !== selectedSpeciesFilter) return false;
+
+                if (radiusFilter !== 'all') {
+                    const dist = getDistanceKm(defaultUserCoords.lat, defaultUserCoords.lng, item.lat, item.lng);
+                    if (parseFloat(dist) > parseFloat(radiusFilter)) return false;
+                }
+                return true;
+            });
+
+            renderMapMarkers(filtered);
+            renderGridCards(filtered);
+            updateStatsBar();
+        }
+
+        function renderMapMarkers(items) {
+            markersGroup.clearLayers();
+
+            items.forEach(item => {
+                const iconClass = getTypeIcon(item.type);
+                const pinClass = `pin-${item.type}`;
+
+                const customDivIcon = L.divIcon({
+                    className: 'custom-pin-wrapper',
+                    html: `<div class="custom-pin ${pinClass}"><i class="${iconClass}"></i></div>`,
+                    iconSize: [34, 34],
+                    iconAnchor: [17, 34],
+                    popupAnchor: [0, -30]
+                });
+
+                const dist = getDistanceKm(defaultUserCoords.lat, defaultUserCoords.lng, item.lat, item.lng);
+
+                const popupContent = `
+                    <div class="popup-card">
+                        <img src="${item.image}" class="popup-img" alt="${item.name}">
+                        <div class="popup-body">
+                            <span class="popup-badge" style="background:${getTypeColor(item.type)}">${getTypeLabel(item.type)}</span>
+                            <h4 class="popup-title">${item.name}</h4>
+                            <div class="popup-meta"><i class="fa-solid fa-location-dot"></i> ${item.address} (${dist} km)</div>
+                            <div class="popup-meta"><i class="fa-solid fa-paw"></i> ${item.species} - ${item.breed || 'Sin raza'}</div>
+                            <a href="https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=Hola,%20vi%20tu%20reporte%20de%20${encodeURIComponent(item.name)}%20en%20Huellas%20de%20Amor" target="_blank" class="popup-btn">
+                                <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                const marker = L.marker([item.lat, item.lng], { icon: customDivIcon });
+                marker.bindPopup(popupContent);
+                markersGroup.addLayer(marker);
+            });
+        }
+
+        function updateStatsBar() {
+            const counts = { adoption: 0, lost: 0, sighting: 0, rescue: 0, deceased: 0 };
+            allReports.forEach(r => { if (counts[r.type] !== undefined) counts[r.type]++; });
+
+            document.getElementById('count-adoption').innerText = counts.adoption;
+            document.getElementById('count-lost').innerText = counts.lost;
+            document.getElementById('count-sighting').innerText = counts.sighting;
+            document.getElementById('count-rescue').innerText = counts.rescue;
+            document.getElementById('count-deceased').innerText = counts.deceased;
+        }
+
+        function renderGridCards(items) {
+            const adoptionGrid = document.getElementById('adoption-cards-grid');
+            const feedGrid = document.getElementById('feed-cards-grid');
+
+            adoptionGrid.innerHTML = '';
+            feedGrid.innerHTML = '';
+
+            items.forEach(item => {
+                const dist = getDistanceKm(defaultUserCoords.lat, defaultUserCoords.lng, item.lat, item.lng);
+                const badgeColor = getTypeColor(item.type);
+                const badgeLabel = getTypeLabel(item.type);
+
+                const cardHtml = `
+                    <div class="pet-card">
+                        <div class="pet-card-media">
+                            <img src="${item.image}" class="pet-card-img" alt="${item.name}">
+                            <span class="pet-card-badge" style="background:${badgeColor}">${badgeLabel}</span>
+                            <span class="pet-card-dist"><i class="fa-solid fa-location-arrow"></i> ${dist} km</span>
+                        </div>
+                        <div class="pet-card-content">
+                            <h3 class="pet-card-title">${item.name}</h3>
+                            <div class="pet-card-info">
+                                <span><i class="fa-solid fa-paw"></i> ${item.species}</span>
+                                <span><i class="fa-solid fa-tag"></i> ${item.breed || 'Sin raza'}</span>
+                            </div>
+                            <p class="pet-card-desc">${item.desc}</p>
+                            <div class="pet-card-actions">
+                                <button class="btn btn-outline" style="flex:1; font-size:0.75rem;" onclick="focusReportOnMap('${item.id}')">
+                                    <i class="fa-solid fa-map-pin"></i> Ver Mapa
+                                </button>
+                                <a href="https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=Hola,%20me%20comunico%20por%20tu%20reporte%20de%20${encodeURIComponent(item.name)}" target="_blank" class="btn btn-primary" style="flex:1; font-size:0.75rem; background:#25D366; border:none;">
+                                    <i class="fa-brands fa-whatsapp"></i> Contactar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                if (item.type === 'adoption') {
+                    adoptionGrid.innerHTML += cardHtml;
+                } else {
+                    feedGrid.innerHTML += cardHtml;
+                }
+            });
+
+            if (adoptionGrid.children.length === 0) {
+                adoptionGrid.innerHTML = '<p style="color:#64748b; grid-column:1/-1;">No se encontraron mascotas en adopción con los filtros seleccionados.</p>';
+            }
+            if (feedGrid.children.length === 0) {
+                feedGrid.innerHTML = '<p style="color:#64748b; grid-column:1/-1;">No hay alertas comunitarias activas con estos filtros.</p>';
+            }
+        }
+
+        function getTypeColor(type) {
+            switch(type) {
+                case 'adoption': return '#10b981';
+                case 'lost': return '#ef4444';
+                case 'sighting': return '#f59e0b';
+                case 'rescue': return '#8b5cf6';
+                case 'deceased': return '#4b5563';
+                default: return '#10b981';
+            }
+        }
+
+        function getTypeLabel(type) {
+            switch(type) {
+                case 'adoption': return 'En Adopción';
+                case 'lost': return 'Perdido';
+                case 'sighting': return 'Avistamiento';
+                case 'rescue': return 'Rescate Urgente';
+                case 'deceased': return 'Fallecido';
+                default: return 'Reporte';
+            }
+        }
+
+        function getTypeIcon(type) {
+            switch(type) {
+                case 'adoption': return 'fa-solid fa-house-chimney';
+                case 'lost': return 'fa-solid fa-magnifying-glass-location';
+                case 'sighting': return 'fa-solid fa-eye';
+                case 'rescue': return 'fa-solid fa-kit-medical';
+                case 'deceased': return 'fa-solid fa-cross';
+                default: return 'fa-solid fa-paw';
+            }
+        }
+
+        function selectSpecies(element) {
+            document.querySelectorAll('#species-pills .filter-pill').forEach(p => p.classList.remove('active'));
+            element.classList.add('active');
+            selectedSpeciesFilter = element.getAttribute('data-species');
+            applyFilters();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const targetView = document.getElementById(tabId);
+            if (targetView) targetView.classList.add('active');
+
+            if (tabId === 'map-tab') {
+                setTimeout(() => map.invalidateSize(), 150);
+            }
+        }
+
+        function focusReportOnMap(id) {
+            const report = allReports.find(r => r.id === id);
+            if (report) {
+                switchTab('map-tab');
+                map.setView([report.lat, report.lng], 16);
+            }
+        }
+
+        function openReportModal(presetType = null, coords = null) {
+            const modal = document.getElementById('report-modal');
+            const typeSelect = document.getElementById('form-type');
+
+            if (presetType) {
+                typeSelect.value = presetType;
+            }
+
+            if (coords) {
+                document.getElementById('form-lat').value = coords.lat;
+                document.getElementById('form-lng').value = coords.lng;
+                document.getElementById('coords-display-text').innerHTML = `<i class="fa-solid fa-location-dot"></i> Coordenadas fijadas: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
+            } else {
+                document.getElementById('form-lat').value = defaultUserCoords.lat;
+                document.getElementById('form-lng').value = defaultUserCoords.lng;
+                document.getElementById('coords-display-text').innerHTML = `<i class="fa-solid fa-location-dot"></i> Coordenadas actuales del sistema`;
+            }
+
+            updateModalFormStyle();
+            modal.classList.add('active');
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.remove('active');
+            document.getElementById('report-form').reset();
+            document.getElementById('form-preview-img').style.display = 'none';
+            document.getElementById('form-file-placeholder').style.display = 'block';
+        }
+
+        function updateModalFormStyle() {
+            const type = document.getElementById('form-type').value;
+            const submitBtn = document.getElementById('form-submit-btn');
+
+            if (type === 'adoption') {
+                submitBtn.style.background = 'var(--primary)';
+                submitBtn.innerText = 'Publicar Adopción';
+            } else if (type === 'rescue') {
+                submitBtn.style.background = 'var(--purple)';
+                submitBtn.innerText = 'Emitir Alerta Urgente';
+            } else if (type === 'deceased') {
+                submitBtn.style.background = 'var(--dark-gray)';
+                submitBtn.innerText = 'Publicar Aviso';
+            } else {
+                submitBtn.style.background = 'var(--danger)';
+                submitBtn.innerText = 'Publicar Reporte';
+            }
+        }
+
+        function setFormToCurrentGPS() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    document.getElementById('form-lat').value = lat;
+                    document.getElementById('form-lng').value = lng;
+                    document.getElementById('coords-display-text').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación fijada por GPS (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                });
+            }
+        }
+
+        function handleImageFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('form-preview-img');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('form-file-placeholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const imgEl = document.getElementById('form-preview-img');
+            const fallbackImg = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop';
+
+            const newReport = {
+                id: Date.now().toString(),
+                type: document.getElementById('form-type').value,
+                name: document.getElementById('form-name').value || 'Desconocido',
+                species: document.getElementById('form-species').value,
+                breed: document.getElementById('form-breed').value,
+                color: document.getElementById('form-color').value,
+                address: document.getElementById('form-address').value,
+                phone: document.getElementById('form-phone').value,
+                desc: document.getElementById('form-desc').value,
+                lat: parseFloat(document.getElementById('form-lat').value),
+                lng: parseFloat(document.getElementById('form-lng').value),
+                image: (imgEl.style.display === 'block' && imgEl.src) ? imgEl.src : fallbackImg,
+                date: new Date().toISOString()
+            };
+
+            allReports.unshift(newReport);
+            saveReportsData();
+            closeReportModal();
+            applyFilters();
+
+            switchTab('map-tab');
+            map.setView([newReport.lat, newReport.lng], 15);
+        }
+    </script>
+</body>
+</html>
