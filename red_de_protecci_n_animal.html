@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red de Protección, Rescate y Adopción Animal</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #d1fae5;
+            --secondary: #f97316;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --grey: #6b7280;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), #047857);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--dark), #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text span {
+            font-size: 0.75rem;
+            color: var(--grey);
+            font-weight: 600;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: #f1f5f9;
+            padding: 0.25rem;
+            border-radius: 12px;
+        }
+
+        .nav-btn {
+            border: none;
+            background: transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--grey);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            color: var(--dark);
+        }
+
+        .nav-btn.active {
+            background: var(--surface);
+            color: var(--primary-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dark);
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* LIVE MAP TAB */
+        #map-view {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Floating Filter Controls */
+        .map-floating-controls {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 500;
+            background: var(--surface);
+            padding: 1rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 320px;
+            max-width: calc(100vw - 2rem);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 0.75rem 0.6rem 2.25rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--grey);
+            font-size: 0.875rem;
+        }
+
+        .filter-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--grey);
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-select, .filter-pills {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 0.35rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--light);
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .filter-pill.active {
+            background: var(--dark);
+            color: white;
+            border-color: var(--dark);
+        }
+
+        .filter-select select {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            background: white;
+            outline: none;
+        }
+
+        .map-stats-bar {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            background: var(--surface);
+            padding: 0.5rem 1.25rem;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .stat-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .stat-dot.adoption { background: var(--primary); }
+        .stat-dot.lost { background: var(--danger); }
+        .stat-dot.sighting { background: var(--warning); }
+        .stat-dot.rescue { background: var(--purple); }
+        .stat-dot.deceased { background: var(--grey); }
+
+        .custom-map-pin {
+            width: 36px;
+            height: 36px;
+            border-radius: 50% 50% 50% 0;
+            position: absolute;
+            transform: rotate(-45deg);
+            left: 50%;
+            top: 50%;
+            margin: -20px 0 0 -20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+
+        .custom-map-pin i {
+            transform: rotate(45deg);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .pin-adoption { background: var(--primary); }
+        .pin-lost { background: var(--danger); }
+        .pin-sighting { background: var(--warning); }
+        .pin-rescue { background: var(--purple); }
+        .pin-deceased { background: var(--grey); }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: var(--radius);
+            padding: 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            width: 260px !important;
+        }
+
+        .popup-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+
+        .popup-body {
+            padding: 0.85rem;
+        }
+
+        .popup-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+        }
+
+        .popup-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .popup-info {
+            font-size: 0.78rem;
+            color: var(--grey);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 0.4rem;
+            font-size: 0.75rem;
+            text-align: center;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+
+        .content-container {
+            width: 100%;
+            height: 100%;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .grid-title h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .grid-title p {
+            color: var(--grey);
+            font-size: 0.875rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            padding-bottom: 2rem;
+        }
+
+        .pet-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25 ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pet-card-img-wrapper {
+            position: relative;
+            height: 180px;
+            width: 100%;
+            background: #f1f5f9;
+        }
+
+        .pet-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .pet-card-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .pet-card-distance {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 0.75rem;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .pet-card-body {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .pet-card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .pet-card-meta {
+            font-size: 0.8rem;
+            color: var(--grey);
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .pet-card-desc {
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .pet-card-footer {
+            display: flex;
+            gap: 0.5rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+            margin-top: auto;
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, #ef4444, #991b1b);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.25);
+        }
+
+        .emergency-info h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .emergency-info p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalIn 0.25s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--grey);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Form elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .location-picker-btn {
+            width: 100%;
+            margin-top: 0.35rem;
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px dashed #0284c7;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .image-preview-box {
+            width: 100%;
+            height: 120px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .image-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .image-preview-box .upload-placeholder {
+            text-align: center;
+            color: var(--grey);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 0.5rem 1rem;
+            }
+            .logo-text { display: none; }
+            .nav-btn span { display: none; }
+            .map-floating-controls {
+                width: calc(100vw - 2rem);
+            }
+            .map-stats-bar {
+                width: calc(100vw - 2rem);
+                overflow-x: auto;
+                justify-content: flex-start;
+                border-radius: 12px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-group.full {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fa-solid => fa-paw"></i>
+            </div>
+            <div class="logo-text">
+                <h1>Red Protectora Animal</h1>
+                <span>Rescate, Adopción & Geolocalización</span>
+            </div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button class="nav-btn active" onclick="switchTab('map-view')">
+                <i class="fa-solid fa-map-location-dot"></i> <span>Mapa en Vivo</span>
+            </button>
+            <button class="nav-btn" onclick="switchTab('adoption-view')">
+                <i class="fa-solid fa-heart"></i> <span>Adopciones</span>
+            </button>
+            <button class="nav-btn" onclick="switchTab('reports-view')">
+                <i class="fa-solid fa-bullhorn"></i> <span>Alertas & Reportes</span>
+            </button>
+        </nav>
+
+        <div class="header-actions">
+            <button class="btn btn-danger" onclick="openReportModal('rescue')">
+                <i class="fa-solid fa-kit-medical"></i> <span>Emergencia</span>
+            </button>
+            <button class="btn btn-primary" onclick="openReportModal()">
+                <i class="fa-solid fa-plus"></i> <span>Nuevo Reporte</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div id="map-view" class="tab-content active">
+            <div class="map-floating-controls">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="map-search-input" placeholder="Buscar por barrio, ciudad o lugar..." onkeypress="handleSearchKeyPress(event)">
+                </div>
+
+                <div class="filter-group">
+                    <label>Tipo de Alerta</label>
+                    <div class="filter-select">
+                        <select id="filter-type" onchange="applyFilters()">
+                            <option value="all">Todos los reportes</option>
+                            <option value="adoption">🟢 Adopción disponible</option>
+                            <option value="lost">🔴 Mascota Perdida</option>
+                            <option value="sighting">🟡 Avistamiento en Calle</option>
+                            <option value="rescue">🟣 Rescate Urgente / Herido</option>
+                            <option value="deceased">⚪ Reporte Fallecido</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>Especie</label>
+                    <div class="filter-pills" id="species-pills">
+                        <div class="filter-pill active" data-species="all" onclick="selectSpeciesFilter(this)">Todos</div>
+                        <div class="filter-pill" data-species="Perro" onclick="selectSpeciesFilter(this)">🐶 Perros</div>
+                        <div class="filter-pill" data-species="Gato" onclick="selectSpeciesFilter(this)">🐱 Gatos</div>
+                        <div class="filter-pill" data-species="Otro" onclick="selectSpeciesFilter(this)">🐾 Otros</div>
+                    </div>
+                </div>
+
+                <div class="filter-group" style="margin-bottom:0;">
+                    <label>Radio de Distancia</label>
+                    <div class="filter-select">
+                        <select id="filter-radius" onchange="applyFilters()">
+                            <option value="all">Cualquier distancia</option>
+                            <option value="1">A menos de 1 km</option>
+                            <option value="3">A menos de 3 km</option>
+                            <option value="5">A menos de 5 km</option>
+                            <option value="10">A menos de 10 km</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="map"></div>
+
+            <div class="map-stats-bar">
+                <div class="stat-item"><div class="stat-dot adoption"></div> <span id="stat-adoption">0</span> Adopción</div>
+                <div class="stat-item"><div class="stat-dot lost"></div> <span id="stat-lost">0</span> Perdidos</div>
+                <div class="stat-item"><div class="stat-dot sighting"></div> <span id="stat-sighting">0</span> Avistamientos</div>
+                <div class="stat-item"><div class="stat-dot rescue"></div> <span id="stat-rescue">0</span> Urgencias</div>
+                <div class="stat-item"><div class="stat-dot deceased"></div> <span id="stat-deceased">0</span> Fallecidos</div>
+            </div>
+        </div>
+
+        <div id="adoption-view" class="tab-content">
+            <div class="content-container">
+                <div class="grid-header">
+                    <div class="grid-title">
+                        <h2>Mascotas en Adopción Responsable</h2>
+                        <p>Encuentra a tu nuevo compañero o publica un rescatado que busca un hogar.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openReportModal('adoption')">
+                        <i class="fa-solid fa-heart"></i> Dar en Adopción
+                    </button>
+                </div>
+
+                <div class="cards-grid" id="adoption-cards-container">
+                    <!-- Dynamic Adoption Cards loaded via JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="reports-view" class="tab-content">
+            <div class="content-container">
+                <div class="emergency-banner">
+                    <div class="emergency-info">
+                        <h3><i class="fa-solid fa-triangle-exclamation"></i> ¿Encontraste un animal herido o fallecido?</h3>
+                        <p>Reporta inmediatamente con la ubicación GPS para alertar a rescatistas y personal de protección animal.</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="openReportModal('rescue')">
+                        <i class="fa-solid fa-bolt"></i> Reportar Ahora
+                    </button>
+                </div>
+
+                <div class="grid-header">
+                    <div class="grid-title">
+                        <h2>Listado de Alertas y Avistamientos</h2>
+                        <p>Mascotas perdidas, vistas en la vía pública o emergencias notificadas en la comunidad.</p>
+                    </div>
+                </div>
+
+                <div class="cards-grid" id="reports-cards-container">
+                    <!-- Dynamic Reports Cards loaded via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title">Publicar Reporte / Mascota</h3>
+                <button class="modal-close" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="report-form" onsubmit="handleFormSubmit(event)">
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Tipo de Publicación *</label>
+                            <select id="form-type" class="form-control" required onchange="updateFormFields()">
+                                <option value="lost">🔴 Mascota Perdida (Busco a mi mascota)</option>
+                                <option value="sighting">🟡 Avistamiento / Visto en calle</option>
+                                <option value="rescue">🟣 Rescate Urgente / Animal Herido</option>
+                                <option value="adoption">🟢 Mascota en Adopción</option>
+                                <option value="deceased">⚪ Animal Fallecido (Aviso de salubridad/dueño)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nombre (o 'Desconocido')</label>
+                            <input type="text" id="form-name" class="form-control" placeholder="Ej: Firulais" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Especie *</label>
+                            <select id="form-species" class="form-control" required>
+                                <option value="Perro">Perro</option>
+                                <option value="Gato">Gato</option>
+                                <option value="Otro">Otro animal</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Raza / Apariencia</label>
+                            <input type="text" id="form-breed" class="form-control" placeholder="Ej: Mestizo, Labrador, etc.">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color / Rasgos distintivos</label>
+                            <input type="text" id="form-color" class="form-control" placeholder="Ej: Manchado, collar rojo">
+                        </div>
+
+                        <div class="form-group full">
+                            <label>Ubicación del Suceso / Punto de Encuentro *</label>
+                            <input type="text" id="form-address" class="form-control" placeholder="Ej: Rotonda El Guegüense, Managua" required>
+                            <button type="button" class="location-picker-btn" onclick="useCurrentLocationForForm()">
+                                <i class="fa-solid fa-location-crosshairs"></i> Usar mi ubicación GPS actual
+                            </button>
+                            <input type="hidden" id="form-lat">
+                            <input type="hidden" id="form-lng">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Contacto Teléfono / WhatsApp *</label>
+                            <input type="tel" id="form-phone" class="form-control" placeholder="+505 8888 8888" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fotografía</label>
+                            <div class="image-preview-box" onclick="document.getElementById('form-file').click()">
+                                <img id="preview-img" src="" alt="Previsualización">
+                                <div class="upload-placeholder" id="upload-placeholder">
+                                    <i class="fa-solid fa-camera fa-2x"></i><br>
+                                    <span>Haz clic para subir foto</span>
+                                </div>
+                            </div>
+                            <input type="file" id="form-file" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+                        </div>
+
+                        <div class="form-group full">
+                            <label>Descripción detallada / Estado de salud</label>
+                            <textarea id="form-desc" class="form-control" placeholder="Detalles de la situación, collar, heridas o comportamiento..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+                        <button type="button" class="btn btn-outline" onclick="closeReportModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="form-submit-btn">Publicar Reporte</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        let map;
+        let markersLayer;
+        let userLocation = { lat: 12.136389, lng: -86.251389 }; // Default center: Managua, Nicaragua
+        let userMarker = null;
+        let selectedSpecies = 'all';
+        let reportsData = [];
+        let tempClickCoords = null;
+
+        // Default initial mock dataset
+        const initialMockReports = [
+            {
+                id: '1',
+                type: 'lost',
+                name: 'Rocky',
+                species: 'Perro',
+                breed: 'Beagle',
+                color: 'Tricolor (Marrón, Blanco, Negro)',
+                address: 'Bolonia, cerca del Parque San Sebastián',
+                phone: '+50588881111',
+                desc: 'Se escapó por la mañana. Lleva un collar azul sin placa. Es muy amigable.',
+                lat: 12.1450,
+                lng: -86.2750,
+                image: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '2',
+                type: 'adoption',
+                name: 'Luna',
+                species: 'Gato',
+                breed: 'Mestiza',
+                color: 'Gris atigrado',
+                address: 'Refugio Mascotas San Francisco, Reparto Altamira',
+                phone: '+50588882222',
+                desc: 'Rescatada hace 2 meses. Esterilizada, desparasitada y muy cariñosa.',
+                lat: 12.1280,
+                lng: -86.2520,
+                image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '3',
+                type: 'sighting',
+                name: 'Desconocido',
+                species: 'Perro',
+                breed: 'Mestizo grande',
+                color: 'Amarillo / Dorado',
+                address: 'Visto cruzando la Rotonda Jean Paul Genie',
+                phone: '+50588883333',
+                desc: 'Parece desorientado y cansado. Se dirigía hacia las Colinas.',
+                lat: 12.1050,
+                lng: -86.2400,
+                image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '4',
+                type: 'rescue',
+                name: 'Sin Nombre',
+                species: 'Perro',
+                breed: 'Cachorro Mestizo',
+                color: 'Negro con patas blancas',
+                address: 'Semáforos de Villa Fontana 2c al sur',
+                phone: '+50588884444',
+                desc: 'URGENTE: Cachorrito herido en una pata al lado del cauce. Se requiere asistencia veterinaria.',
+                lat: 12.1150,
+                lng: -86.2610,
+                image: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            },
+            {
+                id: '5',
+                type: 'deceased',
+                name: 'Desconocido',
+                species: 'Gato',
+                breed: 'Común',
+                color: 'Blanco y Negro',
+                address: 'Pista Suburbana, cerca de la UCA',
+                phone: '+50588885555',
+                desc: 'Encontrado fallecido en el arcén derecho. Aviso para posible dueño o recogida de alcaldía.',
+                lat: 12.1250,
+                lng: -86.2700,
+                image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=500&auto=format&fit=crop',
+                date: new Date().toISOString()
+            }
+        ];
+
+        window.onload = function() {
+            loadStoredReports();
+            initMap();
+            getUserGeolocation();
+            renderAllViews();
+        };
+
+        function loadStoredReports() {
+            const stored = localStorage.getItem('animal_rescue_reports');
+            if (stored) {
+                try {
+                    reportsData = JSON.parse(stored);
+                } catch(e) {
+                    reportsData = initialMockReports;
+                }
+            } else {
+                reportsData = initialMockReports;
+                localStorage.setItem('animal_rescue_reports', JSON.stringify(reportsData));
+            }
+        }
+
+        function saveReports() {
+            localStorage.setItem('animal_rescue_reports', JSON.stringify(reportsData));
+        }
+
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: false
+            }).setView([userLocation.lat, userLocation.lng], 13);
+
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            // OpenStreetMap standard tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            markersLayer = L.layerGroup().addTo(map);
+
+            // Map click listener to select location for new report
+            map.on('click', function(e) {
+                tempClickCoords = e.latlng;
+                openReportModal('lost', e.latlng);
+            });
+        }
+
+        function getUserGeolocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+
+                        map.setView([userLocation.lat, userLocation.lng], 14);
+
+                        if (userMarker) map.removeLayer(userMarker);
+
+                        // User GPS position marker
+                        userMarker = L.circleMarker([userLocation.lat, userLocation.lng], {
+                            radius: 9,
+                            fillColor: "#0284c7",
+                            color: "#ffffff",
+                            weight: 3,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }).addTo(map).bindPopup("<b>Tu Ubicación Actual</b>");
+
+                        applyFilters();
+                    },
+                    error => {
+                        console.log("Geolocation error or permission denied:", error.message);
+                        applyFilters();
+                    }
+                );
+            }
+        }
+
+        // Distance in km calculation
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (R * c).toFixed(1);
+        }
+
+        function renderMapMarkers(filteredData) {
+            markersLayer.clearLayers();
+
+            filteredData.forEach(item => {
+                const iconClass = getIconForType(item.type);
+                const pinColorClass = `pin-${item.type}`;
+
+                const customIcon = L.divIcon({
+                    className: 'custom-pin-container',
+                    html: `<div class="custom-map-pin ${pinColorClass}"><i class="${iconClass}"></i></div>`,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 36],
+                    popupAnchor: [0, -32]
+                });
+
+                const dist = calculateDistance(userLocation.lat, userLocation.lng, item.lat, item.lng);
+
+                const popupHtml = `
+                    <div class="popup-card">
+                        <img src="${item.image}" class="popup-img" alt="${item.name}">
+                        <div class="popup-body">
+                            <span class="popup-badge" style="background:${getTypeColor(item.type)}">${getTypeLabel(item.type)}</span>
+                            <h4 class="popup-title">${item.name}</h4>
+                            <div class="popup-info"><i class="fa-solid fa-location-dot"></i> ${item.address} (${dist} km)</div>
+                            <div class="popup-info"><i class="fa-solid fa-paw"></i> ${item.species} - ${item.breed || 'Sin raza'}</div>
+                            <div class="popup-actions">
+                                <a href="https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=Hola,%20vi%20tu%20reporte%20de%20${encodeURIComponent(item.name)}%20en%20la%20Red%20Protectora" target="_blank" class="popup-btn" style="background:#25D366; color:white;">
+                                    <i class="fa-brands fa-whatsapp"></i> Contactar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const marker = L.marker([item.lat, item.lng], { icon: customIcon });
+                marker.bindPopup(popupHtml);
+                markersLayer.addLayer(marker);
+            });
+
+            updateStatsCounters();
+        }
+
+        function getTypeColor(type) {
+            switch(type) {
+                case 'adoption': return '#10b981';
+                case 'lost': return '#ef4444';
+                case 'sighting': return '#f59e0b';
+                case 'rescue': return '#8b5cf6';
+                case 'deceased': return '#6b7280';
+                default: return '#10b981';
+            }
+        }
+
+        function getTypeLabel(type) {
+            switch(type) {
+                case 'adoption': return 'En Adopción';
+                case 'lost': return 'Perdido';
+                case 'sighting': return 'Avistamiento';
+                case 'rescue': return 'Rescate Urgente';
+                case 'deceased': return 'Fallecido';
+                default: return 'Reporte';
+            }
+        }
+
+        function getIconForType(type) {
+            switch(type) {
+                case 'adoption': return 'fa-solid fa-house-chimney-window';
+                case 'lost': return 'fa-solid fa-magnifying-glass-location';
+                case 'sighting': return 'fa-solid fa-eye';
+                case 'rescue': return 'fa-solid fa-kit-medical';
+                case 'deceased': return 'fa-solid fa-cross';
+                default: return 'fa-solid fa-paw';
+            }
+        }
+
+        function selectSpeciesFilter(element) {
+            document.querySelectorAll('#species-pills .filter-pill').forEach(pill => pill.classList.remove('active'));
+            element.classList.add('active');
+            selectedSpecies = element.getAttribute('data-species');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const radiusFilter = document.getElementById('filter-radius').value;
+
+            const filtered = reportsData.filter(item => {
+                // Type filter
+                if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+
+                // Species filter
+                if (selectedSpecies !== 'all' && item.species !== selectedSpecies) return false;
+
+                // Radius filter
+                if (radiusFilter !== 'all') {
+                    const dist = calculateDistance(userLocation.lat, userLocation.lng, item.lat, item.lng);
+                    if (parseFloat(dist) > parseFloat(radiusFilter)) return false;
+                }
+
+                return true;
+            });
+
+            renderMapMarkers(filtered);
+            renderCardsGrid(filtered);
+        }
+
+        function updateStatsCounters() {
+            const counts = { adoption: 0, lost: 0, sighting: 0, rescue: 0, deceased: 0 };
+            reportsData.forEach(r => {
+                if (counts[r.type] !== undefined) counts[r.type]++;
+            });
+
+            document.getElementById('stat-adoption').innerText = counts.adoption;
+            document.getElementById('stat-lost').innerText = counts.lost;
+            document.getElementById('stat-sighting').innerText = counts.sighting;
+            document.getElementById('stat-rescue').innerText = counts.rescue;
+            document.getElementById('stat-deceased').innerText = counts.deceased;
+        }
+
+        function renderAllViews() {
+            applyFilters();
+        }
+
+        function renderCardsGrid(data) {
+            const adoptionContainer = document.getElementById('adoption-cards-container');
+            const reportsContainer = document.getElementById('reports-cards-container');
+
+            adoptionContainer.innerHTML = '';
+            reportsContainer.innerHTML = '';
+
+            data.forEach(item => {
+                const dist = calculateDistance(userLocation.lat, userLocation.lng, item.lat, item.lng);
+                const badgeBg = getTypeColor(item.type);
+                const badgeLabel = getTypeLabel(item.type);
+
+                const cardHtml = `
+                    <div class="pet-card">
+                        <div class="pet-card-img-wrapper">
+                            <img src="${item.image}" class="pet-card-img" alt="${item.name}">
+                            <span class="pet-card-badge" style="background:${badgeBg}">${badgeLabel}</span>
+                            <span class="pet-card-distance"><i class="fa-solid fa-location-arrow"></i> ${dist} km</span>
+                        </div>
+                        <div class="pet-card-body">
+                            <h3 class="pet-card-title">${item.name}</h3>
+                            <div class="pet-card-meta">
+                                <span><i class="fa-solid fa-paw"></i> ${item.species}</span>
+                                <span><i class="fa-solid fa-tag"></i> ${item.breed || 'Sin raza'}</span>
+                            </div>
+                            <p class="pet-card-desc">${item.desc}</p>
+                            <div class="pet-card-footer">
+                                <button class="btn btn-outline" style="flex:1; font-size:0.75rem;" onclick="focusOnMap('${item.id}')">
+                                    <i class="fa-solid fa-map-pin"></i> Ver Mapa
+                                </button>
+                                <a href="https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=Hola,%20me%20interesa%20tu%20reporte%20de%20${encodeURIComponent(item.name)}" target="_blank" class="btn btn-primary" style="flex:1; font-size:0.75rem; background:#25D366; border:none;">
+                                    <i class="fa-brands fa-whatsapp"></i> Contactar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                if (item.type === 'adoption') {
+                    adoptionContainer.innerHTML += cardHtml;
+                } else {
+                    reportsContainer.innerHTML += cardHtml;
+                }
+            });
+
+            if (adoptionContainer.children.length === 0) {
+                adoptionContainer.innerHTML = '<p style="color:var(--grey); grid-column:1/-1;">No hay mascotas en adopción con los filtros actuales.</p>';
+            }
+            if (reportsContainer.innerHTML === '') {
+                reportsContainer.innerHTML = '<p style="color:var(--grey); grid-column:1/-1;">No hay alertas recientes registradas.</p>';
+            }
+        }
+
+        function focusOnMap(id) {
+            const report = reportsData.find(r => r.id === id);
+            if (report) {
+                switchTab('map-view');
+                map.setView([report.lat, report.lng], 16);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+            const targetBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+            if (targetBtn) targetBtn.classList.add('active');
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+
+            if (tabId === 'map-view') {
+                setTimeout(() => map.invalidateSize(), 100);
+            }
+        }
+
+        function openReportModal(presetType = null, coords = null) {
+            const modal = document.getElementById('report-modal');
+            const typeSelect = document.getElementById('form-type');
+
+            if (presetType) {
+                typeSelect.value = presetType;
+            }
+
+            if (coords) {
+                document.getElementById('form-lat').value = coords.lat;
+                document.getElementById('form-lng').value = coords.lng;
+                document.getElementById('form-address').value = `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
+            } else {
+                document.getElementById('form-lat').value = userLocation.lat;
+                document.getElementById('form-lng').value = userLocation.lng;
+            }
+
+            updateFormFields();
+            modal.classList.add('active');
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.remove('active');
+            document.getElementById('report-form').reset();
+            document.getElementById('preview-img').style.display = 'none';
+            document.getElementById('upload-placeholder').style.display = 'block';
+            tempClickCoords = null;
+        }
+
+        function updateFormFields() {
+            const type = document.getElementById('form-type').value;
+            const submitBtn = document.getElementById('form-submit-btn');
+            const nameInput = document.getElementById('form-name');
+
+            if (type === 'adoption') {
+                submitBtn.style.background = 'var(--primary)';
+                submitBtn.innerText = 'Publicar Adopción';
+                nameInput.placeholder = 'Ej: Pelusa';
+            } else if (type === 'rescue') {
+                submitBtn.style.background = 'var(--purple)';
+                submitBtn.innerText = 'Emitir Alerta de Rescate';
+                nameInput.placeholder = 'Desconocido / Cachorro';
+            } else if (type === 'deceased') {
+                submitBtn.style.background = 'var(--grey)';
+                submitBtn.innerText = 'Registrar Aviso';
+                nameInput.placeholder = 'Desconocido';
+            } else {
+                submitBtn.style.background = 'var(--danger)';
+                submitBtn.innerText = 'Publicar Reporte';
+                nameInput.placeholder = 'Ej: Firulais';
+            }
+        }
+
+        function useCurrentLocationForForm() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('form-lat').value = lat;
+                    document.getElementById('form-lng').value = lng;
+                    
+                    // Reverse geocoding attempt using Nominatim API
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.display_name) {
+                                document.getElementById('form-address').value = data.display_name.split(',').slice(0, 3).join(',');
+                            } else {
+                                document.getElementById('form-address').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                            }
+                        })
+                        .catch(() => {
+                            document.getElementById('form-address').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                        });
+                });
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('preview-img');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('upload-placeholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const imgElement = document.getElementById('preview-img');
+            const defaultImg = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop';
+
+            const newReport = {
+                id: Date.now().toString(),
+                type: document.getElementById('form-type').value,
+                name: document.getElementById('form-name').value || 'Desconocido',
+                species: document.getElementById('form-species').value,
+                breed: document.getElementById('form-breed').value,
+                color: document.getElementById('form-color').value,
+                address: document.getElementById('form-address').value,
+                phone: document.getElementById('form-phone').value,
+                desc: document.getElementById('form-desc').value,
+                lat: parseFloat(document.getElementById('form-lat').value),
+                lng: parseFloat(document.getElementById('form-lng').value),
+                image: imgElement.style.display === 'block' ? imgElement.src : defaultImg,
+                date: new Date().toISOString()
+            };
+
+            reportsData.unshift(newReport);
+            saveReports();
+            closeReportModal();
+            applyFilters();
+
+            // Center map on new report
+            switchTab('map-view');
+            map.setView([newReport.lat, newReport.lng], 15);
+        }
+
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('map-search-input').value;
+                if (!query) return;
+
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lon = parseFloat(data[0].lon);
+                            map.setView([lat, lon], 14);
+                        } else {
+                            alert('No se encontraron resultados para la ubicación buscada.');
+                        }
+                    })
+                    .catch(() => {
+                        alert('Error al buscar la ubicación.');
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
